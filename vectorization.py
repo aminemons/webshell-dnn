@@ -5,16 +5,19 @@ from collections import defaultdict, Counter
 
 _PHP_PRETOK = re.compile(r"[\s\(\)\{\}\[\];,]+")
 _WHITESPACE_PRETOK = re.compile(r"\s+")
+_MAX_TOKEN_LEN = 48
+_MIN_TOKEN_FREQ = 2
+_MAX_VOCAB_BEFORE_BPE = 30000
 
 
 def pretokenize_php(text):
     raw = _PHP_PRETOK.split(text)
-    return [tok for tok in raw if tok]
+    return [tok for tok in raw if tok and len(tok) <= _MAX_TOKEN_LEN]
 
 
 def pretokenize_whitespace(text):
     raw = _WHITESPACE_PRETOK.split(text)
-    return [tok for tok in raw if tok]
+    return [tok for tok in raw if tok and len(tok) <= _MAX_TOKEN_LEN]
 
 
 class BPETokenizer:
@@ -22,6 +25,13 @@ class BPETokenizer:
     Byte Pair Encoding tokenizer.
     Sennrich et al. 2016 - Neural Machine Translation of Rare Words with Subword Units.
     arXiv:1508.07909
+
+    Optimizations over naive BPE:
+    - Pre-token length cap (_MAX_TOKEN_LEN) eliminates huge base64/hex blobs.
+    - Minimum frequency filter (_MIN_TOKEN_FREQ) before BPE drastically shrinks vocab.
+    - Vocabulary cap (_MAX_VOCAB_BEFORE_BPE) bounds worst-case merge iterations.
+    - List-based merge (no regex) avoids re.sub overhead and escape issues.
+    - Merge lookup dict for O(1) pair-priority queries during transform.
     """
 
     def __init__(self, num_merges=1000, vocab_size=256, pretokenizer="php"):
@@ -30,7 +40,8 @@ class BPETokenizer:
         self.pretokenizer = pretokenizer
         self.merges = []
         self.vocab = []
-        self._merge_set = {}
+        self._merge_rank = {}
+        self._vocab_set = {}
 
     def _pretok(self, text):
         if self.pretokenizer == "php":
@@ -43,13 +54,22 @@ class BPETokenizer:
             chars[-1] = chars[-1] + "</w>"
         return tuple(chars)
 
-    def _get_vocab_freq(self, texts):
-        freq = defaultdict(int)
+    def _build_vocab_freq(self, texts):
+        raw_freq = defaultdict(int)
         for text in texts:
-            for token in self._pretok(text):
-                word = self._word_to_chars(token)
-                freq[word] += 1
-        return freq
+            for tok in self._pretok(text):
+                raw_freq[tok] += 1
+
+        raw_freq = {w: f for w, f in raw_freq.items() if f >= _MIN_TOKEN_FREQ}
+        if len(raw_freq) > _MAX_VOCAB_BEFORE_BPE:
+            top = sorted(raw_freq.items(), key=lambda x: -x[1])[:_MAX_VOCAB_BEFORE_BPE]
+            raw_freq = dict(top)
+
+        vocab_freq = {}
+        for word, freq in raw_freq.items():
+            key = self._word_to_chars(word)
+            vocab_freq[key] = vocab_freq.get(key, 0) + freq
+        return vocab_freq
 
     def _get_pair_counts(self, vocab_freq):
         pairs = defaultdict(int)
@@ -59,31 +79,47 @@ class BPETokenizer:
         return pairs
 
     def _merge_vocab(self, pair, vocab_freq):
+        a, b = pair
+        merged = a + b
         new_vocab = {}
-        bigram = re.escape(" ".join(pair))
-        pattern = re.compile(r"(?<!\S)" + bigram + r"(?!\S)")
-        merged = "".join(pair)
         for word_tuple, freq in vocab_freq.items():
-            word_str = " ".join(word_tuple)
-            new_word_str = pattern.sub(lambda m: merged, word_str)
-            new_word_tuple = tuple(new_word_str.split())
-            new_vocab[new_word_tuple] = freq
+            if len(word_tuple) < 2:
+                new_vocab[word_tuple] = freq
+                continue
+            new_word = []
+            i = 0
+            while i < len(word_tuple):
+                if i < len(word_tuple) - 1 and word_tuple[i] == a and word_tuple[i + 1] == b:
+                    new_word.append(merged)
+                    i += 2
+                else:
+                    new_word.append(word_tuple[i])
+                    i += 1
+            new_vocab[tuple(new_word)] = freq
         return new_vocab
 
     def fit(self, texts):
-        vocab_freq = self._get_vocab_freq(texts)
+        print("    BPE: building initial vocab ...", flush=True)
+        vocab_freq = self._build_vocab_freq(texts)
+        print(f"    BPE: {len(vocab_freq)} unique pre-token types after filtering", flush=True)
         self.merges = []
 
-        for _ in range(self.num_merges):
+        for step in range(self.num_merges):
             pairs = self._get_pair_counts(vocab_freq)
             if not pairs:
                 break
             best_pair = max(pairs, key=pairs.get)
+            if pairs[best_pair] < 2:
+                break
             self.merges.append(best_pair)
             vocab_freq = self._merge_vocab(best_pair, vocab_freq)
+            if (step + 1) % 100 == 0:
+                print(f"    BPE: merge {step+1}/{self.num_merges}", flush=True)
 
-        self._merge_set = {pair: idx for idx, pair in enumerate(self.merges)}
+        self._merge_rank = {pair: idx for idx, pair in enumerate(self.merges)}
+        print(f"    BPE: {len(self.merges)} merges learned", flush=True)
 
+        print("    BPE: computing document frequencies for vocabulary ...", flush=True)
         doc_freq = defaultdict(int)
         for text in texts:
             tokens = set(self._tokenize_text(text))
@@ -93,16 +129,23 @@ class BPETokenizer:
         sorted_tokens = sorted(doc_freq.items(), key=lambda x: -x[1])
         self.vocab = [tok for tok, _ in sorted_tokens[: self.vocab_size]]
         self._vocab_set = {tok: idx for idx, tok in enumerate(self.vocab)}
+        print(f"    BPE: final vocab size = {len(self.vocab)}", flush=True)
 
     def _apply_merges(self, word_chars):
         word = list(word_chars)
-        for merge_pair in self.merges:
-            i = 0
-            while i < len(word) - 1:
-                if (word[i], word[i + 1]) == merge_pair:
-                    word = word[:i] + ["".join(merge_pair)] + word[i + 2 :]
-                else:
-                    i += 1
+        while len(word) > 1:
+            best_rank = len(self.merges)
+            best_idx = -1
+            for i in range(len(word) - 1):
+                pair = (word[i], word[i + 1])
+                rank = self._merge_rank.get(pair, len(self.merges))
+                if rank < best_rank:
+                    best_rank = rank
+                    best_idx = i
+            if best_idx == -1:
+                break
+            a, b = word[best_idx], word[best_idx + 1]
+            word = word[:best_idx] + [a + b] + word[best_idx + 2:]
         return word
 
     def _tokenize_text(self, text):
@@ -212,10 +255,6 @@ class TFIDFVectorizer:
         idf(t) = log(N / df(t)) + 1
 
     L2 normalization of final vectors.
-
-    This is the primary vectorization method expected to yield highest accuracy
-    because sublinear TF prevents high-frequency tokens from dominating,
-    and IDF upweights rare discriminative tokens like 'eval', 'base64_decode'.
     """
 
     def __init__(self, tokenizer):
