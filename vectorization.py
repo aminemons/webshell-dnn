@@ -62,9 +62,10 @@ class BPETokenizer:
         new_vocab = {}
         bigram = re.escape(" ".join(pair))
         pattern = re.compile(r"(?<!\S)" + bigram + r"(?!\S)")
+        merged = "".join(pair)
         for word_tuple, freq in vocab_freq.items():
             word_str = " ".join(word_tuple)
-            new_word_str = pattern.sub("".join(pair), word_str)
+            new_word_str = pattern.sub(lambda m: merged, word_str)
             new_word_tuple = tuple(new_word_str.split())
             new_vocab[new_word_tuple] = freq
         return new_vocab
