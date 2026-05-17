@@ -45,19 +45,28 @@ def _fit_vectorizers(X_train_texts, X_val_texts, X_test_texts, tokenizer_type="b
     t0 = time.time()
     oh_vec, bow_vec, tfidf_vec = build_vectorizers(tokenizer_type)
 
+    print("  [1/9] OneHot fit+transform train ...", flush=True)
     X_train_oh = oh_vec.fit_transform(X_train_texts)
+    print("  [2/9] OneHot transform val ...", flush=True)
     X_val_oh = oh_vec.transform(X_val_texts)
+    print("  [3/9] OneHot transform test ...", flush=True)
     X_test_oh = oh_vec.transform(X_test_texts)
 
+    print("  [4/9] BoW fit+transform train ...", flush=True)
     X_train_bow = bow_vec.fit_transform(X_train_texts)
+    print("  [5/9] BoW transform val ...", flush=True)
     X_val_bow = bow_vec.transform(X_val_texts)
+    print("  [6/9] BoW transform test ...", flush=True)
     X_test_bow = bow_vec.transform(X_test_texts)
 
+    print("  [7/9] TF-IDF fit+transform train ...", flush=True)
     X_train_tfidf = tfidf_vec.fit_transform(X_train_texts)
+    print("  [8/9] TF-IDF transform val ...", flush=True)
     X_val_tfidf = tfidf_vec.transform(X_val_texts)
+    print("  [9/9] TF-IDF transform test ...", flush=True)
     X_test_tfidf = tfidf_vec.transform(X_test_texts)
 
-    print(f"  Done in {time.time()-t0:.1f}s. Feature dims: {X_train_oh.shape[1]}")
+    print(f"  Vectorization done in {time.time()-t0:.1f}s. Feature dims: {X_train_oh.shape[1]}", flush=True)
     return {
         "onehot": (X_train_oh, X_val_oh, X_test_oh),
         "bow": (X_train_bow, X_val_bow, X_test_bow),
@@ -460,7 +469,7 @@ def main():
     parser.add_argument("--data-dir", default=None, help="Path to dataset directory")
     parser.add_argument("--phases", nargs="+", type=int, default=[0, 1, 2, 3, 4, 5],
                         help="Which phases to run (default: all)")
-    parser.add_argument("--tokenizer", default="bpe", choices=["bpe", "whitespace"])
+    parser.add_argument("--tokenizer", default="whitespace", choices=["bpe", "whitespace"])
     args = parser.parse_args()
 
     _ensure_dirs()
