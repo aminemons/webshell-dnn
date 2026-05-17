@@ -123,9 +123,11 @@ class BPETokenizer:
         print("    BPE: computing document frequencies for vocabulary ...", flush=True)
         doc_freq = defaultdict(int)
         for text in texts:
-            tokens = set(self._tokenize_text(text))
-            for tok in tokens:
-                doc_freq[tok] += 1
+            seen = set()
+            for tok in self._tokenize_text(text):
+                if tok not in seen:
+                    seen.add(tok)
+                    doc_freq[tok] += 1
 
         sorted_tokens = sorted(doc_freq.items(), key=lambda x: -x[1])
         self.vocab = [tok for tok, _ in sorted_tokens[: self.vocab_size]]
@@ -154,15 +156,13 @@ class BPETokenizer:
         return word
 
     def _tokenize_text(self, text):
-        tokens = []
         for pretok in self._pretok(text):
             chars = self._word_to_chars(pretok)
-            merged = self._apply_merges(chars)
-            tokens.extend(merged)
-        return tokens
+            yield from self._apply_merges(chars)
 
     def transform(self, texts):
-        return [self._tokenize_text(t) for t in texts]
+        for t in texts:
+            yield self._tokenize_text(t)
 
 
 class WhitespaceTokenizer:
