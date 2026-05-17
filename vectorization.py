@@ -42,6 +42,7 @@ class BPETokenizer:
         self.vocab = []
         self._merge_rank = {}
         self._vocab_set = {}
+        self._merge_cache = {}
 
     def _pretok(self, text):
         if self.pretokenizer == "php":
@@ -132,6 +133,9 @@ class BPETokenizer:
         print(f"    BPE: final vocab size = {len(self.vocab)}", flush=True)
 
     def _apply_merges(self, word_chars):
+        cached = self._merge_cache.get(word_chars)
+        if cached is not None:
+            return cached
         word = list(word_chars)
         while len(word) > 1:
             best_rank = len(self.merges)
@@ -146,6 +150,7 @@ class BPETokenizer:
                 break
             a, b = word[best_idx], word[best_idx + 1]
             word = word[:best_idx] + [a + b] + word[best_idx + 2:]
+        self._merge_cache[word_chars] = word
         return word
 
     def _tokenize_text(self, text):
