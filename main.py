@@ -98,8 +98,9 @@ def phase1(X_train, X_val, y_train, y_val, vec_data):
     X_tr_tf, X_vl_tf, _ = vec_data["tfidf"]
     results = {}
 
-    for act_name in activations_to_test:
-        print(f"\n  Testing activation: {act_name}")
+    for i, act_name in enumerate(activations_to_test, 1):
+        print(f"\n  [{i}/{len(activations_to_test)}] Testing activation: {act_name}", flush=True)
+        t0 = time.time()
         trainer, hist = build_and_train(
             X_tr_tf, y_train, X_vl_tf, y_val,
             arch="B", hidden_dim=256, num_blocks=20,
@@ -108,12 +109,12 @@ def phase1(X_train, X_val, y_train, y_val, vec_data):
             scheduler_type="cosine", max_epochs=10, patience=10,
             batch_size=64,
             checkpoint_path=os.path.join(CHECKPOINT_DIR, f"phase1_{act_name}"),
-            verbose=False, log_every=5,
+            verbose=True, log_every=2,
         )
         final_val_loss = hist["val_loss"][-1]
         final_val_acc = hist["val_acc"][-1]
         results[act_name] = {"val_loss": final_val_loss, "val_acc": final_val_acc, "history": hist}
-        print(f"    val_loss={final_val_loss:.4f}  val_acc={final_val_acc:.4f}")
+        print(f"    {act_name}: val_loss={final_val_loss:.4f}  val_acc={final_val_acc:.4f}  ({time.time()-t0:.1f}s)", flush=True)
 
     best_act = min(results, key=lambda k: results[k]["val_loss"])
     print(f"\nBest activation: {best_act} (val_loss={results[best_act]['val_loss']:.4f})")
@@ -140,8 +141,9 @@ def phase2(X_train, X_val, y_train, y_val, vec_data, best_activation):
     X_tr_tf, X_vl_tf, _ = vec_data["tfidf"]
     results = {}
 
-    for opt_name in optimizers_to_test:
-        print(f"\n  Testing optimizer: {opt_name}")
+    for i, opt_name in enumerate(optimizers_to_test, 1):
+        print(f"\n  [{i}/{len(optimizers_to_test)}] Testing optimizer: {opt_name}", flush=True)
+        t0 = time.time()
         trainer, hist = build_and_train(
             X_tr_tf, y_train, X_vl_tf, y_val,
             arch="B", hidden_dim=256, num_blocks=20,
@@ -150,7 +152,7 @@ def phase2(X_train, X_val, y_train, y_val, vec_data, best_activation):
             scheduler_type="cosine", max_epochs=100, patience=50,
             batch_size=64,
             checkpoint_path=os.path.join(CHECKPOINT_DIR, f"phase2_{opt_name}"),
-            verbose=False, log_every=25,
+            verbose=True, log_every=10,
         )
         final_val_loss = hist["val_loss"][-1]
         final_val_acc = hist["val_acc"][-1]
@@ -159,7 +161,7 @@ def phase2(X_train, X_val, y_train, y_val, vec_data, best_activation):
             "val_loss": final_val_loss, "val_acc": final_val_acc,
             "best_val_acc": best_val_acc, "history": hist
         }
-        print(f"    val_loss={final_val_loss:.4f}  val_acc={final_val_acc:.4f}  best_val_acc={best_val_acc:.4f}")
+        print(f"    {opt_name}: val_loss={final_val_loss:.4f}  val_acc={final_val_acc:.4f}  best={best_val_acc:.4f}  ({time.time()-t0:.1f}s)", flush=True)
 
     best_opt = min(results, key=lambda k: results[k]["val_loss"])
     print(f"\nBest optimizer: {best_opt} (val_loss={results[best_opt]['val_loss']:.4f})")

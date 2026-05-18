@@ -228,11 +228,11 @@ class Trainer:
             return cp.asnumpy(X)
         return X
 
-    def _apply_token_dropout(self, X, rng):
+    def _apply_token_dropout(self, X):
         if self.token_dropout_p <= 0.0:
             return X
         xp = get_xp(X)
-        mask = xp.array(rng.random(X.shape) > self.token_dropout_p, dtype=X.dtype)
+        mask = (xp.random.random(X.shape) > self.token_dropout_p).astype(X.dtype)
         return X * mask
 
     def _run_epoch(self, X, y, training):
@@ -241,10 +241,9 @@ class Trainer:
         total_loss = 0.0
         total_correct = 0
         steps = 0
-        rng = np.random.RandomState(0)
 
         if training:
-            perm = xp.array(np.random.permutation(n))
+            perm = xp.random.permutation(n)
         else:
             perm = xp.arange(n)
 
@@ -254,7 +253,7 @@ class Trainer:
             yb = y[idx] if not isinstance(y, np.ndarray) else xp.array(y[idx])
 
             if training:
-                Xb = self._apply_token_dropout(Xb, rng)
+                Xb = self._apply_token_dropout(Xb)
 
             logits = self.model.forward(Xb, training=training)
             loss, p = _bce_loss(logits, yb)
@@ -308,9 +307,10 @@ class Trainer:
 
             if self.verbose and ((epoch + 1) % self.log_every == 0 or epoch == 0):
                 print(
-                    f"Epoch {epoch+1:5d} | lr={current_lr:.6f} | "
+                    f"      Epoch {epoch+1:5d} | lr={current_lr:.6f} | "
                     f"train_loss={train_loss:.4f} train_acc={train_acc:.4f} | "
-                    f"val_loss={val_loss:.4f} val_acc={val_acc:.4f}"
+                    f"val_loss={val_loss:.4f} val_acc={val_acc:.4f}",
+                    flush=True,
                 )
 
             if self._patience_counter >= self.patience:
