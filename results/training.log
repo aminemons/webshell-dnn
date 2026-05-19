@@ -1,0 +1,522 @@
+GPU available: True
+GPU device: {'AsyncEngineCount': 2, 'CanFlushRemoteWrites': 0, 'CanMapHostMemory': 1, 'CanUseHostPointerForRegisteredMem': 1, 'ClockRate': 1695000, 'ComputeMode': 0, 'ComputePreemptionSupported': 1, 'ConcurrentKernels': 1, 'ConcurrentManagedAccess': 1, 'CooperativeLaunch': 1, 'CooperativeMultiDeviceLaunch': 1, 'DirectManagedMemAccessFromHost': 0, 'EccEnabled': 0, 'GPUDirectRDMAFlushWritesOptions': 1, 'GPUDirectRDMASupported': 1, 'GPUDirectRDMAWritesOrdering': 0, 'GlobalL1CacheSupported': 1, 'GlobalMemoryBusWidth': 384, 'GpuOverlap': 1, 'HostNativeAtomicSupported': 0, 'HostRegisterReadOnlySupported': 1, 'HostRegisterSupported': 1, 'Integrated': 0, 'IsMultiGpuBoard': 0, 'KernelExecTimeout': 1, 'L2CacheSize': 6291456, 'LocalL1CacheSupported': 1, 'ManagedMemory': 1, 'MaxBlockDimX': 1024, 'MaxBlockDimY': 1024, 'MaxBlockDimZ': 64, 'MaxBlocksPerMultiprocessor': 16, 'MaxGridDimX': 2147483647, 'MaxGridDimY': 65535, 'MaxGridDimZ': 65535, 'MaxPitch': 2147483647, 'MaxRegistersPerBlock': 65536, 'MaxRegistersPerMultiprocessor': 65536, 'MaxSharedMemoryPerBlock': 49152, 'MaxSharedMemoryPerBlockOptin': 101376, 'MaxSharedMemoryPerMultiprocessor': 102400, 'MaxSurface1DLayeredLayers': 2048, 'MaxSurface1DLayeredWidth': 32768, 'MaxSurface1DWidth': 32768, 'MaxSurface2DHeight': 65536, 'MaxSurface2DLayeredHeight': 32768, 'MaxSurface2DLayeredLayers': 2048, 'MaxSurface2DLayeredWidth': 32768, 'MaxSurface2DWidth': 131072, 'MaxSurface3DDepth': 16384, 'MaxSurface3DHeight': 16384, 'MaxSurface3DWidth': 16384, 'MaxSurfaceCubemapLayeredLayers': 2046, 'MaxSurfaceCubemapLayeredWidth': 32768, 'MaxSurfaceCubemapWidth': 32768, 'MaxTexture1DLayeredLayers': 2048, 'MaxTexture1DLayeredWidth': 32768, 'MaxTexture1DLinearWidth': 268435456, 'MaxTexture1DMipmappedWidth': 32768, 'MaxTexture1DWidth': 131072, 'MaxTexture2DGatherHeight': 32768, 'MaxTexture2DGatherWidth': 32768, 'MaxTexture2DHeight': 65536, 'MaxTexture2DLayeredHeight': 32768, 'MaxTexture2DLayeredLayers': 2048, 'MaxTexture2DLayeredWidth': 32768, 'MaxTexture2DLinearHeight': 65000, 'MaxTexture2DLinearPitch': 2097120, 'MaxTexture2DLinearWidth': 131072, 'MaxTexture2DMipmappedHeight': 32768, 'MaxTexture2DMipmappedWidth': 32768, 'MaxTexture2DWidth': 131072, 'MaxTexture3DDepth': 16384, 'MaxTexture3DDepthAlt': 32768, 'MaxTexture3DHeight': 16384, 'MaxTexture3DHeightAlt': 8192, 'MaxTexture3DWidth': 16384, 'MaxTexture3DWidthAlt': 8192, 'MaxTextureCubemapLayeredLayers': 2046, 'MaxTextureCubemapLayeredWidth': 32768, 'MaxTextureCubemapWidth': 32768, 'MaxThreadsPerBlock': 1024, 'MaxThreadsPerMultiProcessor': 1536, 'MaxTimelineSemaphoreInteropSupported': 1, 'MemoryClockRate': 8001000, 'MemoryPoolSupportedHandleTypes': 9, 'MemoryPoolsSupported': 1, 'MultiGpuBoardGroupID': 0, 'MultiProcessorCount': 64, 'PageableMemoryAccess': 0, 'PageableMemoryAccessUsesHostPageTables': 0, 'PciBusId': 1, 'PciDeviceId': 0, 'PciDomainId': 0, 'Reserved92': 0, 'Reserved93': 0, 'Reserved94': 0, 'ReservedSharedMemoryPerBlock': 1024, 'SingleToDoublePrecisionPerfRatio': 64, 'SparseCudaArraySupported': 1, 'StreamPrioritiesSupported': 1, 'SurfaceAlignment': 512, 'TccDriver': 0, 'TextureAlignment': 512, 'TexturePitchAlignment': 32, 'TotalConstantMemory': 65536, 'UnifiedAddressing': 1, 'WarpSize': 32}
+
+============================================================
+PHASE 0: Data Exploration
+============================================================
+============================================================
+DATASET STATISTICS
+============================================================
+Raw class distribution:
+  Black (webshell): 876
+  White (benign):   1081
+  Total:            1957
+
+File size statistics (bytes):
+  Min:    20
+  Max:    1,445,690
+  Mean:   20,040.4
+  Median: 1,622.0
+  Std:    83,029.6
+
+After balancing (50/50):
+  Per class:      876
+  Total balanced: 1752
+  Train (70%):    1226
+  Val   (15%):    263
+  Test  (15%):    263
+============================================================
+
+Split sizes:
+  Train: 1226 | Val: 263 | Test: 263
+  Train class balance: 0.500 (0.5 = perfect)
+
+Fitting vectorizers (tokenizer=whitespace) ...
+  [1/9] OneHot fit+transform train ...
+  [2/9] OneHot transform val ...
+  [3/9] OneHot transform test ...
+  [4/9] BoW fit+transform train ...
+  [5/9] BoW transform val ...
+  [6/9] BoW transform test ...
+  [7/9] TF-IDF fit+transform train ...
+  [8/9] TF-IDF transform val ...
+  [9/9] TF-IDF transform test ...
+  Vectorization done in 2.6s. Feature dims: 256
+
+============================================================
+PHASE 1: Activation Benchmark
+============================================================
+
+  [1/6] Testing activation: relu
+      Epoch     1 | lr=0.000020 | train_loss=0.7857 train_acc=0.5400 | val_loss=0.7013 val_acc=0.6388
+      Epoch     2 | lr=0.000040 | train_loss=0.7543 train_acc=0.5571 | val_loss=0.6504 val_acc=0.7034
+      Epoch     4 | lr=0.000080 | train_loss=0.6252 train_acc=0.6680 | val_loss=0.4528 val_acc=0.8289
+      Epoch     6 | lr=0.000120 | train_loss=0.4608 train_acc=0.7961 | val_loss=0.3050 val_acc=0.8859
+      Epoch     8 | lr=0.000160 | train_loss=0.3379 train_acc=0.8532 | val_loss=0.1996 val_acc=0.9163
+      Epoch    10 | lr=0.000200 | train_loss=0.2328 train_acc=0.9046 | val_loss=0.1438 val_acc=0.9582
+    relu: val_loss=0.1438  val_acc=0.9582  (8.8s)
+
+  [2/6] Testing activation: leaky_relu
+      Epoch     1 | lr=0.000020 | train_loss=0.7856 train_acc=0.4886 | val_loss=0.7302 val_acc=0.2928
+      Epoch     2 | lr=0.000040 | train_loss=0.7335 train_acc=0.5400 | val_loss=0.6193 val_acc=0.6882
+      Epoch     4 | lr=0.000080 | train_loss=0.6255 train_acc=0.6631 | val_loss=0.4380 val_acc=0.8517
+      Epoch     6 | lr=0.000120 | train_loss=0.4285 train_acc=0.8034 | val_loss=0.2968 val_acc=0.8897
+      Epoch     8 | lr=0.000160 | train_loss=0.3039 train_acc=0.8809 | val_loss=0.2085 val_acc=0.9163
+      Epoch    10 | lr=0.000200 | train_loss=0.2280 train_acc=0.9127 | val_loss=0.1436 val_acc=0.9468
+    leaky_relu: val_loss=0.1436  val_acc=0.9468  (8.8s)
+
+  [3/6] Testing activation: elu
+      Epoch     1 | lr=0.000020 | train_loss=0.7018 train_acc=0.6069 | val_loss=0.5151 val_acc=0.8023
+      Epoch     2 | lr=0.000040 | train_loss=0.5091 train_acc=0.7504 | val_loss=0.2886 val_acc=0.8935
+      Epoch     4 | lr=0.000080 | train_loss=0.2623 train_acc=0.8874 | val_loss=0.1723 val_acc=0.9354
+      Epoch     6 | lr=0.000120 | train_loss=0.1871 train_acc=0.9274 | val_loss=0.1064 val_acc=0.9734
+      Epoch     8 | lr=0.000160 | train_loss=0.1310 train_acc=0.9486 | val_loss=0.1144 val_acc=0.9582
+      Epoch    10 | lr=0.000200 | train_loss=0.1135 train_acc=0.9641 | val_loss=0.0990 val_acc=0.9734
+    elu: val_loss=0.0990  val_acc=0.9734  (9.3s)
+
+  [4/6] Testing activation: gelu
+      Epoch     1 | lr=0.000020 | train_loss=0.7670 train_acc=0.5489 | val_loss=0.7419 val_acc=0.4981
+      Epoch     2 | lr=0.000040 | train_loss=0.7025 train_acc=0.5962 | val_loss=0.6611 val_acc=0.6502
+      Epoch     4 | lr=0.000080 | train_loss=0.5881 train_acc=0.7137 | val_loss=0.3758 val_acc=0.8745
+      Epoch     6 | lr=0.000120 | train_loss=0.3951 train_acc=0.8148 | val_loss=0.2163 val_acc=0.9316
+      Epoch     8 | lr=0.000160 | train_loss=0.2724 train_acc=0.8964 | val_loss=0.1508 val_acc=0.9392
+      Epoch    10 | lr=0.000200 | train_loss=0.2089 train_acc=0.9135 | val_loss=0.1181 val_acc=0.9620
+    gelu: val_loss=0.1181  val_acc=0.9620  (10.2s)
+
+  [5/6] Testing activation: swish
+      Epoch     1 | lr=0.000020 | train_loss=0.7641 train_acc=0.5359 | val_loss=0.6677 val_acc=0.6198
+      Epoch     2 | lr=0.000040 | train_loss=0.6618 train_acc=0.6191 | val_loss=0.5645 val_acc=0.8517
+      Epoch     4 | lr=0.000080 | train_loss=0.4266 train_acc=0.8091 | val_loss=0.2973 val_acc=0.9049
+      Epoch     6 | lr=0.000120 | train_loss=0.2741 train_acc=0.8931 | val_loss=0.1754 val_acc=0.9354
+      Epoch     8 | lr=0.000160 | train_loss=0.1923 train_acc=0.9250 | val_loss=0.1539 val_acc=0.9468
+      Epoch    10 | lr=0.000200 | train_loss=0.1351 train_acc=0.9462 | val_loss=0.1437 val_acc=0.9544
+    swish: val_loss=0.1437  val_acc=0.9544  (9.6s)
+
+  [6/6] Testing activation: mish
+      Epoch     1 | lr=0.000020 | train_loss=0.7236 train_acc=0.5563 | val_loss=0.6575 val_acc=0.5019
+      Epoch     2 | lr=0.000040 | train_loss=0.6563 train_acc=0.6134 | val_loss=0.5091 val_acc=0.7719
+      Epoch     4 | lr=0.000080 | train_loss=0.4250 train_acc=0.8246 | val_loss=0.2645 val_acc=0.9087
+      Epoch     6 | lr=0.000120 | train_loss=0.2755 train_acc=0.8923 | val_loss=0.1749 val_acc=0.9354
+      Epoch     8 | lr=0.000160 | train_loss=0.1903 train_acc=0.9315 | val_loss=0.1302 val_acc=0.9620
+      Epoch    10 | lr=0.000200 | train_loss=0.1301 train_acc=0.9478 | val_loss=0.1149 val_acc=0.9620
+    mish: val_loss=0.1149  val_acc=0.9620  (9.3s)
+
+Best activation: elu (val_loss=0.0990)
+Saved: results/10_activation_benchmark.png
+
+============================================================
+PHASE 2: Optimizer Benchmark
+============================================================
+
+  [1/4] Testing optimizer: adam
+      Epoch     1 | lr=0.000020 | train_loss=0.6418 train_acc=0.6533 | val_loss=0.4869 val_acc=0.8441
+      Epoch    10 | lr=0.000200 | train_loss=0.1196 train_acc=0.9502 | val_loss=0.0993 val_acc=0.9620
+      Epoch    20 | lr=0.000400 | train_loss=0.0648 train_acc=0.9788 | val_loss=0.0996 val_acc=0.9696
+      Epoch    30 | lr=0.000600 | train_loss=0.0167 train_acc=0.9943 | val_loss=0.1308 val_acc=0.9620
+      Epoch    40 | lr=0.000800 | train_loss=0.0271 train_acc=0.9910 | val_loss=0.1151 val_acc=0.9734
+      Epoch    50 | lr=0.001000 | train_loss=0.0281 train_acc=0.9918 | val_loss=0.1146 val_acc=0.9772
+      Epoch    60 | lr=0.000995 | train_loss=0.0325 train_acc=0.9886 | val_loss=0.1164 val_acc=0.9696
+Early stopping at epoch 64 (patience=50)
+    adam: val_loss=0.0967  val_acc=0.9810  best=0.9810  (54.9s)
+
+  [2/4] Testing optimizer: adamw
+      Epoch     1 | lr=0.000020 | train_loss=0.8273 train_acc=0.5383 | val_loss=0.4687 val_acc=0.8593
+      Epoch    10 | lr=0.000200 | train_loss=0.1108 train_acc=0.9584 | val_loss=0.1138 val_acc=0.9658
+      Epoch    20 | lr=0.000400 | train_loss=0.0669 train_acc=0.9739 | val_loss=0.1182 val_acc=0.9696
+      Epoch    30 | lr=0.000600 | train_loss=0.0368 train_acc=0.9837 | val_loss=0.1203 val_acc=0.9620
+      Epoch    40 | lr=0.000800 | train_loss=0.0294 train_acc=0.9894 | val_loss=0.1155 val_acc=0.9696
+      Epoch    50 | lr=0.001000 | train_loss=0.0292 train_acc=0.9910 | val_loss=0.1300 val_acc=0.9772
+      Epoch    60 | lr=0.000995 | train_loss=0.0333 train_acc=0.9943 | val_loss=0.1599 val_acc=0.9658
+      Epoch    70 | lr=0.000978 | train_loss=0.0371 train_acc=0.9927 | val_loss=0.1430 val_acc=0.9658
+      Epoch    80 | lr=0.000949 | train_loss=0.0040 train_acc=0.9992 | val_loss=0.1195 val_acc=0.9696
+Early stopping at epoch 82 (patience=50)
+    adamw: val_loss=0.1209  val_acc=0.9696  best=0.9810  (73.3s)
+
+  [3/4] Testing optimizer: radam
+      Epoch     1 | lr=0.000020 | train_loss=0.9749 train_acc=0.4829 | val_loss=0.7032 val_acc=0.3954
+      Epoch    10 | lr=0.000200 | train_loss=0.2553 train_acc=0.9054 | val_loss=0.1885 val_acc=0.9430
+      Epoch    20 | lr=0.000400 | train_loss=0.1007 train_acc=0.9674 | val_loss=0.1550 val_acc=0.9582
+      Epoch    30 | lr=0.000600 | train_loss=0.0497 train_acc=0.9821 | val_loss=0.1397 val_acc=0.9696
+      Epoch    40 | lr=0.000800 | train_loss=0.0486 train_acc=0.9845 | val_loss=0.1155 val_acc=0.9696
+      Epoch    50 | lr=0.001000 | train_loss=0.0219 train_acc=0.9894 | val_loss=0.1563 val_acc=0.9696
+      Epoch    60 | lr=0.000995 | train_loss=0.0227 train_acc=0.9959 | val_loss=0.1509 val_acc=0.9620
+      Epoch    70 | lr=0.000978 | train_loss=0.0249 train_acc=0.9927 | val_loss=0.1427 val_acc=0.9734
+      Epoch    80 | lr=0.000949 | train_loss=0.0176 train_acc=0.9951 | val_loss=0.1561 val_acc=0.9734
+      Epoch    90 | lr=0.000909 | train_loss=0.0216 train_acc=0.9959 | val_loss=0.1170 val_acc=0.9772
+      Epoch   100 | lr=0.000859 | train_loss=0.0115 train_acc=0.9959 | val_loss=0.1528 val_acc=0.9658
+    radam: val_loss=0.1528  val_acc=0.9658  best=0.9810  (91.5s)
+
+  [4/4] Testing optimizer: ranger
+      Epoch     1 | lr=0.000020 | train_loss=1.0100 train_acc=0.4144 | val_loss=0.9233 val_acc=0.4183
+      Epoch    10 | lr=0.000200 | train_loss=0.2980 train_acc=0.8842 | val_loss=0.1656 val_acc=0.9354
+      Epoch    20 | lr=0.000400 | train_loss=0.1278 train_acc=0.9592 | val_loss=0.1290 val_acc=0.9620
+      Epoch    30 | lr=0.000600 | train_loss=0.0600 train_acc=0.9780 | val_loss=0.1360 val_acc=0.9658
+      Epoch    40 | lr=0.000800 | train_loss=0.0383 train_acc=0.9853 | val_loss=0.1134 val_acc=0.9734
+      Epoch    50 | lr=0.001000 | train_loss=0.0348 train_acc=0.9886 | val_loss=0.1104 val_acc=0.9772
+      Epoch    60 | lr=0.000995 | train_loss=0.0211 train_acc=0.9918 | val_loss=0.1229 val_acc=0.9772
+      Epoch    70 | lr=0.000978 | train_loss=0.0151 train_acc=0.9967 | val_loss=0.1132 val_acc=0.9772
+      Epoch    80 | lr=0.000949 | train_loss=0.0429 train_acc=0.9935 | val_loss=0.1083 val_acc=0.9772
+      Epoch    90 | lr=0.000909 | train_loss=0.0072 train_acc=0.9992 | val_loss=0.1376 val_acc=0.9696
+      Epoch   100 | lr=0.000859 | train_loss=0.0105 train_acc=0.9959 | val_loss=0.1258 val_acc=0.9734
+    ranger: val_loss=0.1258  val_acc=0.9734  best=0.9848  (93.6s)
+
+Best optimizer: adam (val_loss=0.0967)
+Saved: results/11_optimizer_benchmark.png
+
+============================================================
+PHASE 3: Full Training Matrix (3 vec x 3 arch)
+============================================================
+
+  Run: TFIDF-ArchB
+      Epoch     1 | lr=0.000020 | train_loss=0.8400 train_acc=0.5302 | val_loss=0.5407 val_acc=0.8061
+      Epoch   100 | lr=0.000859 | train_loss=0.0105 train_acc=0.9951 | val_loss=0.1396 val_acc=0.9772
+      Epoch   200 | lr=0.000153 | train_loss=0.0005 train_acc=1.0000 | val_loss=0.1561 val_acc=0.9734
+Early stopping at epoch 214 (patience=150)
+  Test metrics for TFIDF-ArchB:
+    Accuracy:  0.9734
+    Precision: 0.9921
+    Recall:    0.9542
+    F1:        0.9728
+    AUC-ROC:   0.9983
+    Confusion matrix (TN FP / FN TP):
+      [[  131      1]
+       [    6    125]]
+
+  Run: TFIDF-ArchA
+      Epoch     1 | lr=0.000020 | train_loss=0.8520 train_acc=0.5106 | val_loss=0.7833 val_acc=0.5019
+      Epoch   100 | lr=0.000859 | train_loss=0.0690 train_acc=0.9829 | val_loss=0.1151 val_acc=0.9696
+      Epoch   200 | lr=0.000153 | train_loss=0.0446 train_acc=0.9878 | val_loss=0.1253 val_acc=0.9734
+Early stopping at epoch 279 (patience=150)
+  Test metrics for TFIDF-ArchA:
+    Accuracy:  0.4981
+    Precision: 0.4981
+    Recall:    1.0000
+    F1:        0.6650
+    AUC-ROC:   0.9964
+    Confusion matrix (TN FP / FN TP):
+      [[    0    132]
+       [    0    131]]
+
+  Run: TFIDF-ArchC
+      Epoch     1 | lr=0.000020 | train_loss=2.8869 train_acc=0.5261 | val_loss=0.7143 val_acc=0.7490
+      Epoch   100 | lr=0.000859 | train_loss=0.0886 train_acc=0.9967 | val_loss=0.1969 val_acc=0.9810
+      Epoch   200 | lr=0.000153 | train_loss=0.0006 train_acc=1.0000 | val_loss=0.1538 val_acc=0.9772
+      Epoch   300 | lr=0.000963 | train_loss=0.0008 train_acc=1.0000 | val_loss=0.1663 val_acc=0.9810
+      Epoch   400 | lr=0.000695 | train_loss=0.0008 train_acc=0.9992 | val_loss=0.1682 val_acc=0.9772
+Early stopping at epoch 461 (patience=150)
+  Test metrics for TFIDF-ArchC:
+    Accuracy:  0.9734
+    Precision: 0.9844
+    Recall:    0.9618
+    F1:        0.9730
+    AUC-ROC:   0.9974
+    Confusion matrix (TN FP / FN TP):
+      [[  130      2]
+       [    5    126]]
+
+  Run: BOW-ArchB
+      Epoch     1 | lr=0.000020 | train_loss=0.7018 train_acc=0.6248 | val_loss=0.4736 val_acc=0.8707
+      Epoch   100 | lr=0.000859 | train_loss=0.0107 train_acc=0.9951 | val_loss=0.1245 val_acc=0.9772
+      Epoch   200 | lr=0.000153 | train_loss=0.0006 train_acc=1.0000 | val_loss=0.1461 val_acc=0.9772
+Early stopping at epoch 211 (patience=150)
+  Test metrics for BOW-ArchB:
+    Accuracy:  0.9696
+    Precision: 0.9920
+    Recall:    0.9466
+    F1:        0.9687
+    AUC-ROC:   0.9955
+    Confusion matrix (TN FP / FN TP):
+      [[  131      1]
+       [    7    124]]
+
+  Run: BOW-ArchA
+      Epoch     1 | lr=0.000020 | train_loss=0.9169 train_acc=0.4861 | val_loss=0.6879 val_acc=0.5019
+      Epoch   100 | lr=0.000859 | train_loss=0.0747 train_acc=0.9878 | val_loss=0.0854 val_acc=0.9772
+      Epoch   200 | lr=0.000153 | train_loss=0.0532 train_acc=0.9951 | val_loss=0.0994 val_acc=0.9772
+Early stopping at epoch 229 (patience=150)
+  Test metrics for BOW-ArchA:
+    Accuracy:  0.9658
+    Precision: 0.9766
+    Recall:    0.9542
+    F1:        0.9653
+    AUC-ROC:   0.9869
+    Confusion matrix (TN FP / FN TP):
+      [[  129      3]
+       [    6    125]]
+
+  Run: BOW-ArchC
+      Epoch     1 | lr=0.000020 | train_loss=2.4613 train_acc=0.5889 | val_loss=0.6052 val_acc=0.7110
+      Epoch   100 | lr=0.000859 | train_loss=0.0019 train_acc=1.0000 | val_loss=0.1973 val_acc=0.9772
+      Epoch   200 | lr=0.000153 | train_loss=0.0002 train_acc=1.0000 | val_loss=0.1885 val_acc=0.9696
+GPU available: True
+GPU device: {'AsyncEngineCount': 2, 'CanFlushRemoteWrites': 0, 'CanMapHostMemory': 1, 'CanUseHostPointerForRegisteredMem': 1, 'ClockRate': 1695000, 'ComputeMode': 0, 'ComputePreemptionSupported': 1, 'ConcurrentKernels': 1, 'ConcurrentManagedAccess': 1, 'CooperativeLaunch': 1, 'CooperativeMultiDeviceLaunch': 1, 'DirectManagedMemAccessFromHost': 0, 'EccEnabled': 0, 'GPUDirectRDMAFlushWritesOptions': 1, 'GPUDirectRDMASupported': 1, 'GPUDirectRDMAWritesOrdering': 0, 'GlobalL1CacheSupported': 1, 'GlobalMemoryBusWidth': 384, 'GpuOverlap': 1, 'HostNativeAtomicSupported': 0, 'HostRegisterReadOnlySupported': 1, 'HostRegisterSupported': 1, 'Integrated': 0, 'IsMultiGpuBoard': 0, 'KernelExecTimeout': 1, 'L2CacheSize': 6291456, 'LocalL1CacheSupported': 1, 'ManagedMemory': 1, 'MaxBlockDimX': 1024, 'MaxBlockDimY': 1024, 'MaxBlockDimZ': 64, 'MaxBlocksPerMultiprocessor': 16, 'MaxGridDimX': 2147483647, 'MaxGridDimY': 65535, 'MaxGridDimZ': 65535, 'MaxPitch': 2147483647, 'MaxRegistersPerBlock': 65536, 'MaxRegistersPerMultiprocessor': 65536, 'MaxSharedMemoryPerBlock': 49152, 'MaxSharedMemoryPerBlockOptin': 101376, 'MaxSharedMemoryPerMultiprocessor': 102400, 'MaxSurface1DLayeredLayers': 2048, 'MaxSurface1DLayeredWidth': 32768, 'MaxSurface1DWidth': 32768, 'MaxSurface2DHeight': 65536, 'MaxSurface2DLayeredHeight': 32768, 'MaxSurface2DLayeredLayers': 2048, 'MaxSurface2DLayeredWidth': 32768, 'MaxSurface2DWidth': 131072, 'MaxSurface3DDepth': 16384, 'MaxSurface3DHeight': 16384, 'MaxSurface3DWidth': 16384, 'MaxSurfaceCubemapLayeredLayers': 2046, 'MaxSurfaceCubemapLayeredWidth': 32768, 'MaxSurfaceCubemapWidth': 32768, 'MaxTexture1DLayeredLayers': 2048, 'MaxTexture1DLayeredWidth': 32768, 'MaxTexture1DLinearWidth': 268435456, 'MaxTexture1DMipmappedWidth': 32768, 'MaxTexture1DWidth': 131072, 'MaxTexture2DGatherHeight': 32768, 'MaxTexture2DGatherWidth': 32768, 'MaxTexture2DHeight': 65536, 'MaxTexture2DLayeredHeight': 32768, 'MaxTexture2DLayeredLayers': 2048, 'MaxTexture2DLayeredWidth': 32768, 'MaxTexture2DLinearHeight': 65000, 'MaxTexture2DLinearPitch': 2097120, 'MaxTexture2DLinearWidth': 131072, 'MaxTexture2DMipmappedHeight': 32768, 'MaxTexture2DMipmappedWidth': 32768, 'MaxTexture2DWidth': 131072, 'MaxTexture3DDepth': 16384, 'MaxTexture3DDepthAlt': 32768, 'MaxTexture3DHeight': 16384, 'MaxTexture3DHeightAlt': 8192, 'MaxTexture3DWidth': 16384, 'MaxTexture3DWidthAlt': 8192, 'MaxTextureCubemapLayeredLayers': 2046, 'MaxTextureCubemapLayeredWidth': 32768, 'MaxTextureCubemapWidth': 32768, 'MaxThreadsPerBlock': 1024, 'MaxThreadsPerMultiProcessor': 1536, 'MaxTimelineSemaphoreInteropSupported': 1, 'MemoryClockRate': 8001000, 'MemoryPoolSupportedHandleTypes': 9, 'MemoryPoolsSupported': 1, 'MultiGpuBoardGroupID': 0, 'MultiProcessorCount': 64, 'PageableMemoryAccess': 0, 'PageableMemoryAccessUsesHostPageTables': 0, 'PciBusId': 1, 'PciDeviceId': 0, 'PciDomainId': 0, 'Reserved92': 0, 'Reserved93': 0, 'Reserved94': 0, 'ReservedSharedMemoryPerBlock': 1024, 'SingleToDoublePrecisionPerfRatio': 64, 'SparseCudaArraySupported': 1, 'StreamPrioritiesSupported': 1, 'SurfaceAlignment': 512, 'TccDriver': 0, 'TextureAlignment': 512, 'TexturePitchAlignment': 32, 'TotalConstantMemory': 65536, 'UnifiedAddressing': 1, 'WarpSize': 32}
+
+============================================================
+PHASE 0: Data Exploration
+============================================================
+============================================================
+DATASET STATISTICS
+============================================================
+Raw class distribution:
+  Black (webshell): 876
+  White (benign):   1081
+  Total:            1957
+
+File size statistics (bytes):
+  Min:    20
+  Max:    1,445,690
+  Mean:   20,040.4
+  Median: 1,622.0
+  Std:    83,029.6
+
+After balancing (50/50):
+  Per class:      876
+  Total balanced: 1752
+  Train (70%):    1226
+  Val   (15%):    263
+  Test  (15%):    263
+============================================================
+
+Split sizes:
+  Train: 1226 | Val: 263 | Test: 263
+  Train class balance: 0.500 (0.5 = perfect)
+
+Fitting vectorizers (tokenizer=whitespace) ...
+  [1/9] OneHot fit+transform train ...
+  [2/9] OneHot transform val ...
+  [3/9] OneHot transform test ...
+  [4/9] BoW fit+transform train ...
+  [5/9] BoW transform val ...
+  [6/9] BoW transform test ...
+  [7/9] TF-IDF fit+transform train ...
+  [8/9] TF-IDF transform val ...
+  [9/9] TF-IDF transform test ...
+  Vectorization done in 4.3s. Feature dims: 256
+
+============================================================
+PHASE 1: Activation Benchmark
+============================================================
+  Cached results found, loading ...
+  Best activation (cached): elu (val_loss=0.0990)
+
+============================================================
+PHASE 2: Optimizer Benchmark
+============================================================
+  Cached results found, loading ...
+  Best optimizer (cached): adam (val_loss=0.0967)
+
+============================================================
+PHASE 3: Full Training Matrix (3 vec x 3 arch)
+============================================================
+
+  Run: TFIDF-ArchB
+      Epoch     1 | lr=0.000020 | train_loss=0.7794 train_acc=0.5701 | val_loss=0.5005 val_acc=0.8023
+      Epoch   100 | lr=0.000859 | train_loss=0.0279 train_acc=0.9984 | val_loss=0.1006 val_acc=0.9810
+Early stopping at epoch 177 (patience=150)
+  Test metrics for TFIDF-ArchB:
+    Accuracy:  0.9658
+    Precision: 0.9919
+    Recall:    0.9389
+    F1:        0.9647
+    AUC-ROC:   0.9958
+    Confusion matrix (TN FP / FN TP):
+      [[  131      1]
+       [    8    123]]
+
+  Run: TFIDF-ArchA
+      Epoch     1 | lr=0.000020 | train_loss=0.8594 train_acc=0.5033 | val_loss=0.6947 val_acc=0.6540
+      Epoch   100 | lr=0.000859 | train_loss=0.6952 train_acc=0.5000 | val_loss=0.6931 val_acc=0.5019
+Early stopping at epoch 156 (patience=150)
+  Test metrics for TFIDF-ArchA:
+    Accuracy:  0.6882
+    Precision: 0.6788
+    Recall:    0.7099
+    F1:        0.6940
+    AUC-ROC:   0.7717
+    Confusion matrix (TN FP / FN TP):
+      [[   88     44]
+       [   38     93]]
+
+  Run: TFIDF-ArchC
+      Epoch     1 | lr=0.000020 | train_loss=3.5421 train_acc=0.4674 | val_loss=1.0798 val_acc=0.5361
+      Epoch   100 | lr=0.000859 | train_loss=0.0277 train_acc=0.9927 | val_loss=0.1536 val_acc=0.9810
+      Epoch   200 | lr=0.000153 | train_loss=0.0030 train_acc=0.9992 | val_loss=0.1529 val_acc=0.9848
+      Epoch   300 | lr=0.000963 | train_loss=0.0037 train_acc=0.9992 | val_loss=0.1815 val_acc=0.9696
+      Epoch   400 | lr=0.000695 | train_loss=0.0021 train_acc=0.9984 | val_loss=0.1479 val_acc=0.9772
+      Epoch   500 | lr=0.000313 | train_loss=0.0047 train_acc=0.9992 | val_loss=0.1254 val_acc=0.9810
+      Epoch   600 | lr=0.000041 | train_loss=0.0039 train_acc=0.9992 | val_loss=0.1361 val_acc=0.9810
+Early stopping at epoch 614 (patience=150)
+  Test metrics for TFIDF-ArchC:
+    Accuracy:  0.9848
+    Precision: 0.9922
+    Recall:    0.9771
+    F1:        0.9846
+    AUC-ROC:   0.9975
+    Confusion matrix (TN FP / FN TP):
+      [[  131      1]
+       [    3    128]]
+
+  Run: BOW-ArchB
+      Epoch     1 | lr=0.000020 | train_loss=0.7006 train_acc=0.6419 | val_loss=0.5361 val_acc=0.7605
+      Epoch   100 | lr=0.000859 | train_loss=0.0062 train_acc=0.9984 | val_loss=0.1128 val_acc=0.9772
+Early stopping at epoch 187 (patience=150)
+  Test metrics for BOW-ArchB:
+    Accuracy:  0.9430
+    Precision: 0.9915
+    Recall:    0.8931
+    F1:        0.9398
+    AUC-ROC:   0.9940
+    Confusion matrix (TN FP / FN TP):
+      [[  131      1]
+       [   14    117]]
+
+  Run: BOW-ArchA
+      Epoch     1 | lr=0.000020 | train_loss=nan train_acc=0.4992 | val_loss=nan val_acc=0.4981
+      Epoch   100 | lr=0.000859 | train_loss=nan train_acc=0.5000 | val_loss=nan val_acc=0.4981
+Early stopping at epoch 150 (patience=150)
+  Test metrics for BOW-ArchA:
+    Accuracy:  0.9544
+    Precision: 0.9917
+    Recall:    0.9160
+    F1:        0.9524
+    AUC-ROC:   0.9607
+    Confusion matrix (TN FP / FN TP):
+      [[  131      1]
+       [   11    120]]
+
+  Run: BOW-ArchC
+      Epoch     1 | lr=0.000020 | train_loss=2.6943 train_acc=0.5636 | val_loss=2.2166 val_acc=0.5057
+      Epoch   100 | lr=0.000859 | train_loss=0.0245 train_acc=0.9951 | val_loss=0.1480 val_acc=0.9734
+Early stopping at epoch 169 (patience=150)
+  Test metrics for BOW-ArchC:
+    Accuracy:  0.8251
+    Precision: 1.0000
+    Recall:    0.6489
+    F1:        0.7870
+    AUC-ROC:   0.9948
+    Confusion matrix (TN FP / FN TP):
+      [[  132      0]
+       [   46     85]]
+
+  Run: ONEHOT-ArchB
+      Epoch     1 | lr=0.000020 | train_loss=0.7898 train_acc=0.5481 | val_loss=0.3676 val_acc=0.8973
+      Epoch   100 | lr=0.000859 | train_loss=0.0144 train_acc=0.9951 | val_loss=0.1172 val_acc=0.9734
+      Epoch   200 | lr=0.000153 | train_loss=0.0016 train_acc=0.9992 | val_loss=0.1394 val_acc=0.9734
+Early stopping at epoch 200 (patience=150)
+  Test metrics for ONEHOT-ArchB:
+    Accuracy:  0.9392
+    Precision: 0.9021
+    Recall:    0.9847
+    F1:        0.9416
+    AUC-ROC:   0.9967
+    Confusion matrix (TN FP / FN TP):
+      [[  118     14]
+       [    2    129]]
+
+  Run: ONEHOT-ArchA
+      Epoch     1 | lr=0.000020 | train_loss=nan train_acc=0.4959 | val_loss=nan val_acc=0.4981
+      Epoch   100 | lr=0.000859 | train_loss=nan train_acc=0.5000 | val_loss=nan val_acc=0.4981
+Early stopping at epoch 150 (patience=150)
+  Test metrics for ONEHOT-ArchA:
+    Accuracy:  0.8213
+    Precision: 1.0000
+    Recall:    0.6412
+    F1:        0.7814
+    AUC-ROC:   0.8017
+    Confusion matrix (TN FP / FN TP):
+      [[  132      0]
+       [   47     84]]
+
+  Run: ONEHOT-ArchC
+      Epoch     1 | lr=0.000020 | train_loss=3.7894 train_acc=0.4869 | val_loss=1.8102 val_acc=0.6730
+      Epoch   100 | lr=0.000859 | train_loss=0.0310 train_acc=0.9935 | val_loss=0.2099 val_acc=0.9734
+      Epoch   200 | lr=0.000153 | train_loss=0.0005 train_acc=1.0000 | val_loss=0.2055 val_acc=0.9696
+Early stopping at epoch 272 (patience=150)
+  Test metrics for ONEHOT-ArchC:
+    Accuracy:  0.9658
+    Precision: 0.9420
+    Recall:    0.9924
+    F1:        0.9665
+    AUC-ROC:   0.9959
+    Confusion matrix (TN FP / FN TP):
+      [[  124      8]
+       [    1    130]]
+Saved: results/01_loss_curves_grid.png
+Saved: results/02_accuracy_curves_grid.png
+Saved: results/03_vectorization_comparison.png
+Saved: results/04_architecture_comparison.png
+Saved: results/07_roc_curves.png
+
+============================================================
+PHASE 4: Depth Sensitivity Analysis
+============================================================
+
+  Arch B, num_blocks=5
+      Epoch     1 | lr=0.000020 | train_loss=0.7867 train_acc=0.5465 | val_loss=0.5378 val_acc=0.7414
+      Epoch   150 | lr=0.000508 | train_loss=0.0033 train_acc=0.9992 | val_loss=0.1252 val_acc=0.9772
+Early stopping at epoch 163 (patience=150)
+    best_val_acc=0.9848  test_acc=0.8555
+
+  Arch B, num_blocks=10
+      Epoch     1 | lr=0.000020 | train_loss=0.7596 train_acc=0.6052 | val_loss=0.5859 val_acc=0.7072
+      Epoch   150 | lr=0.000508 | train_loss=0.0035 train_acc=0.9992 | val_loss=0.1427 val_acc=0.9772
+Early stopping at epoch 170 (patience=150)
+    best_val_acc=0.9810  test_acc=0.9658
+
+  Arch B, num_blocks=20
+      Epoch     1 | lr=0.000020 | train_loss=0.7295 train_acc=0.6028 | val_loss=0.4079 val_acc=0.8517
+      Epoch   150 | lr=0.000508 | train_loss=0.0023 train_acc=0.9992 | val_loss=0.1580 val_acc=0.9696
+Early stopping at epoch 215 (patience=150)
+    best_val_acc=0.9848  test_acc=0.9734
+
+  Arch B, num_blocks=30
+      Epoch     1 | lr=0.000020 | train_loss=0.8246 train_acc=0.5310 | val_loss=0.4979 val_acc=0.8061
+      Epoch   150 | lr=0.000508 | train_loss=0.0029 train_acc=0.9984 | val_loss=0.1142 val_acc=0.9772
+Early stopping at epoch 187 (patience=150)
+    best_val_acc=0.9848  test_acc=0.9696
+
+  Arch B, num_blocks=40
+      Epoch     1 | lr=0.000020 | train_loss=0.7754 train_acc=0.5408 | val_loss=0.5230 val_acc=0.8669
+      Epoch   150 | lr=0.000508 | train_loss=0.0076 train_acc=0.9984 | val_loss=0.1419 val_acc=0.9810
+Early stopping at epoch 192 (patience=150)
+    best_val_acc=0.9848  test_acc=0.9658
+
+  Arch B, num_blocks=60
+      Epoch     1 | lr=0.000020 | train_loss=0.6833 train_acc=0.6313 | val_loss=0.4071 val_acc=0.8479
+      Epoch   150 | lr=0.000508 | train_loss=0.0042 train_acc=0.9992 | val_loss=0.0926 val_acc=0.9810
+      Epoch   300 | lr=0.000963 | train_loss=0.0108 train_acc=0.9967 | val_loss=0.1111 val_acc=0.9734
+Early stopping at epoch 408 (patience=150)
+    best_val_acc=0.9848  test_acc=0.9696
+/home/amine/webshell-dnn/visualization.py:263: RuntimeWarning: invalid value encountered in multiply
+  H = np.log(pi_sum) + beta * np.sum(pi * di) / pi_sum
+Saved: results/05_depth_sensitivity.png
+
+============================================================
+PHASE 5: Final Evaluation
+============================================================
+
+Best configuration: TFIDF-ArchC
+  Test accuracy: 0.9848
+
+Retraining best configuration for gradient flow capture ...
+Saved: results/06_gradient_flow.png
+Saved: results/09_tsne.png
+
+============================================================
+FINAL TEST SET RESULTS (Best Configuration)
+============================================================
+  Accuracy:  0.9011
+  Precision: 0.8431
+  Recall:    0.9847
+  F1:        0.9085
+  AUC-ROC:   0.9906
+  Confusion matrix (TN FP / FN TP):
+    [[  108     24]
+     [    2    129]]
+Saved: results/08_confusion_matrix.png
+
+WARNING: test accuracy 0.9011 < 0.95. Revisit hyperparameters.
+Generated results.md
+
+All phases complete. Results in ./results/
+=== Training finished at Tue 19 May 15:20:02 CET 2026 ===
