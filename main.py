@@ -34,6 +34,11 @@ def _save_json(obj, path):
         json.dump(obj, f, indent=2, default=lambda x: x.tolist() if hasattr(x, "tolist") else str(x))
 
 
+def _load_json(path):
+    with open(path) as f:
+        return json.load(f)
+
+
 def _to_cpu(X):
     if _GPU_AVAILABLE and cp is not None and isinstance(X, cp.ndarray):
         return cp.asnumpy(X)
@@ -92,6 +97,14 @@ def phase1(X_train, X_val, y_train, y_val, vec_data):
     print("PHASE 1: Activation Benchmark")
     print("=" * 60)
 
+    cache_path = os.path.join(RESULTS_DIR, "phase1_activation_benchmark.json")
+    if os.path.exists(cache_path):
+        print("  Cached results found, loading ...", flush=True)
+        cached = _load_json(cache_path)
+        best_act = min(cached, key=lambda k: cached[k]["val_loss"])
+        print(f"  Best activation (cached): {best_act} (val_loss={cached[best_act]['val_loss']:.4f})", flush=True)
+        return best_act, cached
+
     from activations import BENCHMARK_ACTIVATIONS
     activations_to_test = BENCHMARK_ACTIVATIONS
 
@@ -126,7 +139,7 @@ def phase1(X_train, X_val, y_train, y_val, vec_data):
 
     _save_json(
         {k: {kk: v for kk, v in vv.items() if kk != "history"} for k, vv in results.items()},
-        os.path.join(RESULTS_DIR, "phase1_activation_benchmark.json")
+        cache_path
     )
     return best_act, results
 
@@ -136,6 +149,14 @@ def phase2(X_train, X_val, y_train, y_val, vec_data, best_activation):
     print("\n" + "=" * 60)
     print("PHASE 2: Optimizer Benchmark")
     print("=" * 60)
+
+    cache_path = os.path.join(RESULTS_DIR, "phase2_optimizer_benchmark.json")
+    if os.path.exists(cache_path):
+        print("  Cached results found, loading ...", flush=True)
+        cached = _load_json(cache_path)
+        best_opt = min(cached, key=lambda k: cached[k]["val_loss"])
+        print(f"  Best optimizer (cached): {best_opt} (val_loss={cached[best_opt]['val_loss']:.4f})", flush=True)
+        return best_opt, cached
 
     optimizers_to_test = ["adam", "adamw", "radam", "ranger"]
     X_tr_tf, X_vl_tf, _ = vec_data["tfidf"]
@@ -174,7 +195,7 @@ def phase2(X_train, X_val, y_train, y_val, vec_data, best_activation):
 
     _save_json(
         {k: {kk: v for kk, v in vv.items() if kk != "history"} for k, vv in results.items()},
-        os.path.join(RESULTS_DIR, "phase2_optimizer_benchmark.json")
+        cache_path
     )
     return best_opt, results
 
@@ -200,7 +221,22 @@ def phase3(X_train, X_val, y_train, y_val, vec_data, y_test, test_vec_data,
 
         for arch in arch_names:
             label = f"{vec_name.upper()}-Arch{arch}"
-            print(f"\n  Run: {label}")
+            run_cache = os.path.join(RESULTS_DIR, f"phase3_{vec_name}_{arch}_run.json")
+
+            if os.path.exists(run_cache):
+                print(f"\n  Run: {label} (cached)", flush=True)
+                cached_run = _load_json(run_cache)
+                met = cached_run["metrics"]
+                y_proba = np.array(cached_run["y_proba"])
+                hist = cached_run.get("history", {"train_loss": [], "val_loss": [], "train_acc": [], "val_acc": [], "lr": [], "grad_norms": {}})
+                all_histories.append(hist)
+                all_labels.append(label)
+                all_results.append((label, y_test, y_proba, met["auc_roc"]))
+                matrix[vec_name][arch] = {"metrics": met, "label": label}
+                print(f"  Test metrics for {label} (cached): acc={met['accuracy']:.4f} auc={met['auc_roc']:.4f}", flush=True)
+                continue
+
+            print(f"\n  Run: {label}", flush=True)
             num_blocks = 20 if arch in ("B", "C") else 40
             trainer, hist = build_and_train(
                 X_tr, y_train, X_vl, y_val,
@@ -215,6 +251,14 @@ def phase3(X_train, X_val, y_train, y_val, vec_data, y_test, test_vec_data,
             y_proba = trainer.predict_proba(X_te_final)
             y_pred = (y_proba >= 0.5).astype(np.int32)
             met = evaluate(y_test, y_pred, y_proba)
+            met_serializable = {k: (v.tolist() if hasattr(v, "tolist") else v) for k, v in met.items()}
+            _save_json(
+                {"metrics": met_serializable, "y_proba": y_proba.tolist(), "history": {
+                    k: (v if isinstance(v, list) else {str(kk): vv for kk, vv in v.items()})
+                    for k, v in hist.items()
+                }},
+                run_cache
+            )
             all_histories.append(hist)
             all_labels.append(label)
             all_results.append((label, y_test, y_proba, met["auc_roc"]))
@@ -222,22 +266,25 @@ def phase3(X_train, X_val, y_train, y_val, vec_data, y_test, test_vec_data,
             print(f"  Test metrics for {label}:")
             print_metrics(met, prefix="    ")
 
-    viz.plot_loss_curves_grid(all_histories, all_labels)
-    viz.plot_accuracy_curves_grid(all_histories, all_labels)
+    if all_histories:
+        viz.plot_loss_curves_grid(all_histories, all_labels)
+        viz.plot_accuracy_curves_grid(all_histories, all_labels)
 
-    histories_by_vec_on_archB = {
-        vn: [h for h, l in zip(all_histories, all_labels) if vn.upper() in l and "ArchB" in l][0]
-        for vn in vec_names
-    }
-    viz.plot_vectorization_comparison(histories_by_vec_on_archB, "Arch B")
+        archB_histories = {}
+        tfidf_histories = {}
+        for h, l in zip(all_histories, all_labels):
+            vn = l.split("-")[0].lower()
+            arch_tag = l.split("Arch")[-1]
+            if "ArchB" in l:
+                archB_histories[vn] = h
+            if "TFIDF" in l:
+                tfidf_histories[arch_tag] = h
+        if len(archB_histories) == len(vec_names):
+            viz.plot_vectorization_comparison(archB_histories, "Arch B")
+        if len(tfidf_histories) == len(arch_names):
+            viz.plot_architecture_comparison(tfidf_histories, "TF-IDF")
 
-    histories_by_arch_on_tfidf = {
-        arch: [h for h, l in zip(all_histories, all_labels) if "TFIDF" in l and f"Arch{arch}" in l][0]
-        for arch in arch_names
-    }
-    viz.plot_architecture_comparison(histories_by_arch_on_tfidf, "TF-IDF")
-
-    viz.plot_roc_curves(all_results)
+        viz.plot_roc_curves(all_results)
 
     _save_json(
         {vn: {arch: v for arch, v in vv.items()} for vn, vv in matrix.items()},
@@ -253,6 +300,14 @@ def phase4(X_train, X_val, X_test, y_train, y_val, y_test, vec_data,
     print("PHASE 4: Depth Sensitivity Analysis")
     print("=" * 60)
 
+    cache_path = os.path.join(RESULTS_DIR, "phase4_depth.json")
+    if os.path.exists(cache_path):
+        print("  Cached results found, loading ...", flush=True)
+        cached = _load_json(cache_path)
+        depth_results = {int(k): v for k, v in cached.items()}
+        print(f"  Loaded {len(depth_results)} depth results from cache.", flush=True)
+        return depth_results
+
     depths = [5, 10, 20, 30, 40, 60]
     X_tr, X_vl, X_te = vec_data["tfidf"]
     depth_results = {}
@@ -261,7 +316,7 @@ def phase4(X_train, X_val, X_test, y_train, y_val, y_test, vec_data,
     test_accs = []
 
     for n_blocks in depths:
-        print(f"\n  Arch B, num_blocks={n_blocks}")
+        print(f"\n  Arch B, num_blocks={n_blocks}", flush=True)
         trainer, hist = build_and_train(
             X_tr, y_train, X_vl, y_val,
             arch="B", hidden_dim=256, num_blocks=n_blocks,
@@ -279,10 +334,10 @@ def phase4(X_train, X_val, X_test, y_train, y_val, y_test, vec_data,
         val_accs.append(best_val_acc)
         test_accs.append(met["accuracy"])
         depth_results[n_blocks] = {"best_val_acc": best_val_acc, "test_acc": met["accuracy"], "test_auc": met["auc_roc"]}
-        print(f"    best_val_acc={best_val_acc:.4f}  test_acc={met['accuracy']:.4f}")
+        print(f"    best_val_acc={best_val_acc:.4f}  test_acc={met['accuracy']:.4f}", flush=True)
 
     viz.plot_depth_sensitivity(depths, val_accs, test_accs)
-    _save_json(depth_results, os.path.join(RESULTS_DIR, "phase4_depth.json"))
+    _save_json(depth_results, cache_path)
     return depth_results
 
 

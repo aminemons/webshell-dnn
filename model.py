@@ -129,18 +129,12 @@ def build_model(input_dim, hidden_dim, num_blocks, activation, dropout_rate,
 
     if arch == "A":
         layers.append(Dense(input_dim, hidden_dim))
-        if normalization == "batch":
-            layers.append(BatchNormalization(hidden_dim))
-        else:
-            layers.append(LayerNormalization(hidden_dim))
+        layers.append(LayerNormalization(hidden_dim))
         layers.append(get_activation(activation))
         layers.append(Dropout(dropout_rate))
         for _ in range(num_blocks - 1):
             layers.append(Dense(hidden_dim, hidden_dim))
-            if normalization == "batch":
-                layers.append(BatchNormalization(hidden_dim))
-            else:
-                layers.append(LayerNormalization(hidden_dim))
+            layers.append(LayerNormalization(hidden_dim))
             layers.append(get_activation(activation))
             layers.append(Dropout(dropout_rate))
         layers.append(Dense(hidden_dim, 1))
